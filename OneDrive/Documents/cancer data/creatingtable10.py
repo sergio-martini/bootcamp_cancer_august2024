@@ -1,0 +1,248 @@
+import psycopg2
+
+# Database connection parameters
+hostname = 'localhost'
+database = 'Liveprojectdb'
+username = 'postgres'
+password = '123456'
+port = 5432
+
+# Establishing the connection
+conn = psycopg2.connect(
+    host=hostname,
+    dbname=database,
+    user=username,
+    password=password,
+    port=port
+)
+
+# Creating a cursor object
+cur = conn.cursor()
+
+# SQL queries to create the tables
+create_sim_av_tumour_table = """
+CREATE TABLE sim_av_tumour (
+    TUMOURID INTEGER PRIMARY KEY,
+    GENDER CHAR(10),
+    PATIENTID INTEGER,
+    DIAGNOSISDATEBEST DATE,
+    SITE_ICD10_O2_3CHAR CHAR(10),
+    SITE_ICD10_O2 CHAR(10),
+    SITE_ICD10R4_O2_3CHAR_FROM2013 CHAR(10),
+    SITE_ICD10R4_O2_FROM2013 CHAR(10),
+    SITE_ICDO3REV2011 CHAR(10),
+    SITE_ICDO3REV2011_3CHAR CHAR(10),
+    MORPH_ICD10_O2 CHAR(10),
+    MORPH_ICDO3REV2011 CHAR(10),
+    BEHAVIOUR_ICD10_O2 CHAR(10),
+    BEHAVIOUR_ICDO3REV2011 CHAR(10),
+    T_BEST CHAR(10),
+    N_BEST CHAR(10),
+    M_BEST CHAR(10),
+    STAGE_BEST CHAR(10),
+    GRADE CHAR(10),
+    AGE INTEGER,
+    CREG_CODE CHAR(10),
+    STAGE_BEST_SYSTEM CHAR(10),
+    LATERALITY CHAR(10),
+    SCREENINGSTATUSFULL_CODE CHAR(10),
+    ER_STATUS CHAR(10),
+    PR_STATUS CHAR(10),
+    HER2_STATUS CHAR(10),
+    QUINTILE_2019 CHAR(10),
+    DATE_FIRST_SURGERY DATE,
+    CANCERCAREPLANINTENT CHAR(10),
+    PERFORMANCESTATUS CHAR(10),
+    CHRL_TOT_27_03 INTEGER,
+    COMORBIDITIES_27_03 CHAR(10),
+    GLEASON_PRIMARY CHAR(10),
+    GLEASON_SECONDARY CHAR(10),
+    GLEASON_TERTIARY CHAR(10),
+    GLEASON_COMBINED INTEGER
+);
+"""
+
+create_sim_av_gene_table = """
+CREATE TABLE sim_av_gene (
+    GENEID CHAR(10) PRIMARY KEY,
+    TUMOURID INTEGER,
+    PATIENTID INTEGER,
+    GENE_DESC CHAR(255),
+    GENE NUMERIC,
+    COUNT_TESTS NUMERIC,
+    COUNT_RESULTS NUMERIC,
+    COUNT_DATE NUMERIC,
+    ALL_TESTSTATUSES CHAR(255),
+    OVERALL_TS CHAR(255),
+    NO_OF_AB_GATS NUMERIC,
+    DNASEQ_GAT CHAR(255),
+    METHYL_GAT CHAR(255),
+    EXP_GAT CHAR(255),
+    COPYNO_GAT CHAR(255),
+    FUS_TRANS_GAT CHAR(255),
+    ABNORMAL_GAT CHAR(255),
+    NO_OF_SEQ_VARS NUMERIC,
+    ALL_SEQ_VARS CHAR(255),
+    SEQ_VAR CHAR(255),
+    DATE_OVERALL_TS DATE,
+    BEST_DATE_SOURCE_OVERALL_TS CHAR(255),
+    MIN_DATE DATE,
+    MAX_DATE DATE,
+    ALL_PRO_IMPS CHAR(255),
+    NO_PRO_IMPS INTEGER,
+    PRO_IMP CHAR(255),
+    METHODS CHAR(255),
+    LAB_NAME CHAR(255)
+);
+"""
+
+create_sim_sact_regimen_table = """
+CREATE TABLE sim_sact_regimen (
+    ENCORE_PATIENT_ID INTEGER,
+    MERGED_REGIMEN_ID INTEGER PRIMARY KEY,
+    HEIGHT_AT_START_OF_REGIMEN NUMERIC,
+    WEIGHT_AT_START_OF_REGIMEN NUMERIC,
+    INTENT_OF_TREATMENT CHAR(255),
+    DATE_DECISION_TO_TREAT DATE,
+    START_DATE_OF_REGIMEN DATE,
+    MAPPED_REGIMEN CHAR(255),
+    CLINICAL_TRIAL CHAR(255),
+    CHEMO_RADIATION CHAR(255),
+    BENCHMARK_GROUP CHAR(255),
+    LINK_NUMBER INTEGER
+);
+"""
+
+create_sim_sact_cycle_table = """
+CREATE TABLE sim_sact_cycle (
+    MERGED_REGIMEN_ID INTEGER,
+    MERGED_CYCLE_ID INTEGER PRIMARY KEY,
+    CYCLE_NUMBER INTEGER,
+    START_DATE_OF_CYCLE DATE,
+    OPCS_PROCUREMENT_CODE CHAR(255),
+    PERF_STATUS_START_OF_CYCLE CHAR(255)
+);
+"""
+
+create_sim_sact_drug_detail_table = """
+CREATE TABLE sim_sact_drug_detail (
+    MERGED_DRUG_DETAIL_ID INTEGER PRIMARY KEY,
+    MERGED_CYCLE_ID INTEGER,
+    ACTUAL_DOSE_PER_ADMINISTRATION NUMERIC,
+    OPCS_DELIVERY_CODE CHAR(255),
+    ADMINISTRATION_ROUTE CHAR(255),
+    ADMINISTRATION_DATE DATE,
+    DRUG_GROUP CHAR(255)
+);
+"""
+
+create_sim_sact_outcome_table = """
+CREATE TABLE sim_sact_outcome (
+    MERGED_REGIMEN_ID INTEGER,
+    DATE_OF_FINAL_TREATMENT DATE,
+    REGIMEN_MOD_DOSE_REDUCTION CHAR(255),
+    REGIMEN_MOD_TIME_DELAY CHAR(255),
+    REGIMEN_MOD_STOPPED_EARLY CHAR(255),
+    REGIMEN_OUTCOME_SUMMARY CHAR(255)
+);
+"""
+
+create_sim_rtds_episode_table = """
+CREATE TABLE sim_rtds_episode (
+    PATIENTID INTEGER,
+    RADIOTHERAPYEPISODEID INTEGER PRIMARY KEY,
+    ATTENDID CHAR(255),
+    APPTDATE DATE,
+    LINKCODE CHAR(255),
+    DECISIONTOTREATDATE DATE,
+    EARLIESTCLINAPPROPDATE DATE,
+    RADIOTHERAPYPRIORITY CHAR(255),
+    RADIOTHERAPYINTENT CHAR(255)
+);
+"""
+
+create_sim_rtds_prescription_table = """
+CREATE TABLE sim_rtds_prescription (
+    PATIENTID INTEGER,
+    PRESCRIPTIONID INTEGER PRIMARY KEY,
+    RTTREATMENTMODALITY CHAR(255),
+    RTPRESCRIBEDDOSE NUMERIC,
+    PRESCRIBEDFRACTIONS NUMERIC,
+    RTACTUALDOSE NUMERIC,
+    RTACTUALFRACTIONS NUMERIC,
+    TREATMENTREGION CHAR(255),
+    TREATMENTANATOMICALSITE CHAR(255),
+    RADIOTHERAPYEPISODEID INTEGER,
+    ATTENDID CHAR(255),
+    APPTDATE DATE,
+    LINKCODE CHAR(255)
+);
+"""
+
+create_sim_rtds_exposure_table = """
+CREATE TABLE sim_rtds_exposure (
+    PRESCRIPTIONID INTEGER,
+    RADIOISOTOPE CHAR(255),
+    RADIOTHERAPYBEAMTYPE CHAR(255),
+    RADIOTHERAPYBEAMENERGY NUMERIC,
+    TIMEOFEXPOSURE TIME,
+    RADIOTHERAPYEPISODEID INTEGER,
+    ATTENDID CHAR(255),
+    APPTDATE DATE,
+    LINKCODE CHAR(255),
+    PATIENTID INTEGER
+);
+"""
+
+create_sim_rtds_combined_table = """
+CREATE TABLE sim_rtds_combined (
+    PATIENTID INTEGER,
+    PRESCRIPTIONID INTEGER,
+    RADIOTHERAPYEPISODEID INTEGER,
+    ATTENDID CHAR(255),
+    APPTDATE DATE,
+    LINKCODE CHAR(255),
+    RTTREATMENTMODALITY CHAR(255),
+    RTPRESCRIBEDDOSE NUMERIC,
+    PRESCRIBEDFRACTIONS NUMERIC,
+    RTACTUALDOSE NUMERIC,
+    RTACTUALFRACTIONS NUMERIC,
+    TREATMENTREGION CHAR(255),
+    TREATMENTANATOMICALSITE CHAR(255),
+    DECISIONTOTREATDATE DATE,
+    EARLIESTCLINAPPROPDATE DATE,
+    RADIOTHERAPYPRIORITY CHAR(255),
+    RADIOTHERAPYINTENT CHAR(255),
+    RADIOISOTOPE CHAR(255),
+    RADIOTHERAPYBEAMTYPE CHAR(255),
+    RADIOTHERAPYBEAMENERGY NUMERIC,
+    TIMEOFEXPOSURE TIME
+);
+"""
+
+# List of queries
+queries = [
+    create_sim_av_tumour_table,
+    create_sim_av_gene_table,
+    create_sim_sact_regimen_table,
+    create_sim_sact_cycle_table,
+    create_sim_sact_drug_detail_table,
+    create_sim_sact_outcome_table,
+    create_sim_rtds_episode_table,
+    create_sim_rtds_prescription_table,
+    create_sim_rtds_exposure_table,
+    create_sim_rtds_combined_table
+]
+
+# Executing each query
+for query in queries:
+    cur.execute(query)
+
+# Committing the transaction
+conn.commit()
+
+# Closing the cursor and connection
+cur.close()
+conn.close()
+
+print("All tables created successfully")
